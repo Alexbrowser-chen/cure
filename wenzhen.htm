@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中醫辨證系統</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="wenzhen-style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-heartbeat"></i> 中醫辨證系統</h1>
+      <p class="subtitle">系統基於傳統中醫理論開發，提供專業的辨證參考。</p>
+    </header>
+    
+    <div class="content">
+      <div class="selection-area">
+        <h2><i class="fas fa-stethoscope"></i> 症狀選擇區 <span class="counter" id="symptomCounter">14</span></h2>
+        
+        <div class="info-bar">
+          <i class="fas fa-info-circle"></i>
+          <div>每選擇一項症狀，系統即時辨證並顯示結果</div>
+        </div>
+        
+        <!-- 症狀分類與選擇框在同一行 -->
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-thermometer-half"></i> 寒熱症狀</div>
+          <select id='hot'>
+            <option value="">-- 選擇寒熱症狀，惡寒是得衣仍寒，畏寒是得衣則暖，高熱是38度以上 --</option>
+            <option>高熱</option>
+            <option>低熱</option>
+            <option>發熱</option>
+            <option>惡寒</option>
+            <option>畏寒</option>
+            <option>發熱輕惡風（傷風）</option>
+            <option>忽冷忽熱</option>
+            <option>寒熱往來</option>
+            <option>手足心熱</option>
+            <option>汗出熱不退</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-tint"></i> 出汗症狀</div>
+          <select id='sweat'>
+            <option value="">-- 選擇出汗症狀 --</option>
+            <option>出汗</option>
+            <option>汗出熱不退</option>
+            <option>無汗</option>
+            <option>微汗</option>
+            <option>易出汗</option>
+            <option>頭汗</option>
+            <option>冷汗</option>
+            <option>盜汗（睡著出汗醒了汗止）</option>
+            <option>自汗（不熱也汗）</option>
+            <option>絕汗（病危）</option>
+            <option>偏汗（上下半身汗）</option>
+            <option>手足心汗</option>
+            <option>胸口汗</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-wind"></i> 鼻部症狀</div>
+          <select id='nose'>
+            <option value="">-- 選擇鼻部症狀 --</option>
+            <option>清涕</option>
+            <option>白涕</option>
+            <option>黃涕</option>
+            <option>鼻煽</option>
+            <option>鼻塞重</option>
+            <option>鼻塞間歇性</option>
+            <option>鼻涕倒流</option>
+            <option>鼻竇炎</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-comment-medical"></i> 口部症狀</div>
+          <select id='mouth'>
+            <option value="">-- 選擇口部症狀 --</option>
+            <option>口渴</option>
+            <option>口苦</option>
+            <option>口臭</option>
+            <option>嘔吐</option>
+            <option>噁心欲吐</option>
+            <option>噯腐吞酸</option>
+            <option>飲不止渴</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-throat"></i> 咽喉症狀</div>
+          <select id='throat'>
+            <option value="">-- 選擇咽喉症狀 --</option>
+            <option>咽癢</option>
+            <option>咽痛</option>
+            <option>咽紅</option>
+            <option>咽乾</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-lips"></i> 唇部症狀</div>
+          <select id='lips'>
+            <option value="">-- 選擇唇部症狀 --</option>
+            <option>唇紅</option>
+            <option>唇白</option>
+            <option>唇紫</option>
+            <option>唇黑</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-lungs"></i> 呼吸症狀</div>
+          <select id='breath'>
+            <option value="">-- 選擇呼吸症狀 --</option>
+            <option>咳嗽</option>
+            <option>用力咳</option>
+            <option>喘咳</option>
+            <option>輕咳嗽</option>
+            <option>乾咳</option>
+            <option>氣短</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-head-side-cough"></i> 痰液症狀</div>
+          <select id='phlegm'>
+            <option value="">-- 選擇痰液症狀 --</option>
+            <option>有痰但難咳出</option>
+            <option>黃痰</option>
+            <option>白痰</option>
+            <option>綠痰</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-pain"></i> 酸疼麻症狀</div>
+          <select id='pain'>
+            <option value="">-- 選擇酸疼麻症狀 --</option>
+            <option>頭疼</option>
+            <option>頭暈</option>
+            <option>頭身重疼</option>
+            <option>頭身輕疼</option>
+            <option>項背輕疼</option>
+            <option>項背重疼</option>
+            <option>胸脇苦滿</option>
+            <option>胸脇疼</option>
+            <option>小腹疼</option>
+            <option>肢體酸痛</option>
+            <option>胃脘疼痛</option>
+            <option>寒疝痛</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-toilet"></i> 小便症狀</div>
+          <select id='urine'>
+            <option value="">-- 選擇小便症狀 --</option>
+            <option>小便量少</option>
+            <option>小便赤</option>
+            <option>小便黃</option>
+            <option>夜尿多</option>
+            <option>尿後餘瀝</option>
+            <option>尿頻</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-poop"></i> 大便症狀</div>
+          <select id='stool'>
+            <option value="">-- 選擇大便症狀 --</option>
+            <option>便溏（大便不成形）</option>
+            <option>便秘</option>
+            <option>大便色深</option>
+            <option>大便色淺</option>
+            <option>瀉痢</option>
+            <option>大便帶泡沫</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-teeth-open"></i> 舌部症狀</div>
+          <select id='tongue'>
+            <option value="">-- 選擇舌部症狀 --</option>
+            <option>舌紅</option>
+            <option>苔白</option>
+            <option>舌乾</option>
+            <option>苔黃</option>
+            <option>舌有裂紋</option>
+            <option>舌紅少苔</option>
+            <option>舌暗紫</option>
+            <option>齒痕舌</option>
+            <option>舌胖</option>
+            <option>舌胖紫</option>
+            <option>舌邊尖有瘀斑、瘀點</option>
+            <option>舌體細長</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-bed"></i> 全身狀態</div>
+          <select id='spirit'>
+            <option value="">-- 選擇全身狀態 --</option>
+            <option>乏力</option>
+            <option>嗜睡</option>
+            <option>水腫</option>
+            <option>顏面水腫</option>
+            <option>下肢水腫</option>
+            <option>失眠</option>
+           <option>食慾差</option>
+           <option>煩燥</option>
+          </select>
+        </div>
+        
+        <div class="symptom-category">
+          <div class="category-title"><i class="fas fa-heartbeat"></i> 脈象</div>
+          <select id='pulse'>
+            <option value="">-- 選擇脈象 --</option>
+            <option>數脈</option>
+            <option>大脈</option>
+            <option>小脈</option>
+            <option>浮脈</option>
+            <option>沉脈</option>
+            <option>滑脈</option>
+            <option>弦脈</option>
+            <option>緊脈</option>
+          </select>
+        </div>
+        
+        <div class="controls">
+          <button class="btn btn-clear" id="clearBtn">
+            <i class="fas fa-trash-alt"></i> 清除所有症狀
+          </button>
+        </div>
+      </div>
+      
+      <div class="results-area">
+        <div class="results-header">
+          <div class="results-title">
+            <h2><i class="fas fa-diagnoses"></i> 即時辨證結果</h2>
+            <span class="counter" id="resultCounter">0</span>
+          </div>
+          <div>
+            <h3><i class="fas fa-check-circle"></i> 已選症狀 <span class="counter" id="selectedCounter">0</span></h3>
+          </div>
+        </div>
+        
+        <!-- 右上角的已選症狀區域 -->
+        <div class="selected-symptoms-top">
+          <div id="selected-symptoms-container">
+            <div class="empty-message">暫無選擇症狀，請從左側選擇</div>
+          </div>
+        </div>
+        
+        <div class="diagnosis-results" id="output">
+          <div class="no-results">
+            <i class="fas fa-info-circle"></i>
+            <p>請選擇症狀開始辨證分析</p>
+            <p>每選一項症狀，系統會自動更新辨證結果</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <footer>
+      <p>? 2023 中醫實時辨證系統 | 基於傳統中醫理論開發 | 僅供參考，具體診斷請諮詢專業中醫師</p>
+    </footer>
+  </div>
+
+  <!-- 外部数据文件 -->
+<meta charset="UTF-8">
+<script src="wenzhen-symp-medi-data.js"></script>
+
+  <script>
+var selectedSymptoms = [];
+var selects = document.getElementsByTagName('select');
+var selectedContainer = document.getElementById('selected-symptoms-container');
+var selectedCounter = document.getElementById('selectedCounter');
+var resultCounter = document.getElementById('resultCounter');
+var symptomCounter = document.getElementById('symptomCounter');
+var output = document.getElementById('output');
+var clearBtn = document.getElementById('clearBtn');
+
+document.addEventListener('DOMContentLoaded', function() {
+  for (var i = 0; i < selects.length; i++) {
+    selects[i].onchange = function() {
+      if (this.value) {
+        addSymptom(this.value);
+      } else {
+        removeCategorySymptoms(this.id);
+      }
+    };
+  }
+
+  clearBtn.onclick = function() {
+    clearAll();
+  };
+
+  updateSymptomCount();
+});
+
+function updateSymptomCount() {
+  var total = 0;
+  for (var i = 0; i < selects.length; i++) {
+    total += selects[i].options.length - 1;
+  }
+  symptomCounter.innerHTML = total;
+}
+
+function addSymptom(symptom) {
+  var exists = false;
+  for (var i = 0; i < selectedSymptoms.length; i++) {
+    if (selectedSymptoms[i] === symptom) {
+      exists = true;
+      break;
+    }
+  }
+  if (!exists) {
+    selectedSymptoms[selectedSymptoms.length] = symptom;
+    updateSelectedSymptomsDisplay();
+    diagnose();
+  }
+}
+
+function removeCategorySymptoms(categoryId) {
+  var sel = document.getElementById(categoryId);
+  var options = [];
+  for (var i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value) {
+      options[options.length] = sel.options[i].text;
+    }
+  }
+
+  var newSymptoms = [];
+  for (var i = 0; i < selectedSymptoms.length; i++) {
+    var isFound = false;
+    for (var j = 0; j < options.length; j++) {
+      if (selectedSymptoms[i] === options[j]) {
+        isFound = true;
+        break;
+      }
+    }
+    if (!isFound) {
+      newSymptoms[newSymptoms.length] = selectedSymptoms[i];
+    }
+  }
+  selectedSymptoms = newSymptoms;
+  updateSelectedSymptomsDisplay();
+  diagnose();
+}
+
+function removeSymptom(symptom) {
+  var newSymptoms = [];
+  for (var i = 0; i < selectedSymptoms.length; i++) {
+    if (selectedSymptoms[i] !== symptom) {
+      newSymptoms[newSymptoms.length] = selectedSymptoms[i];
+    }
+  }
+  selectedSymptoms = newSymptoms;
+  updateSelectedSymptomsDisplay();
+  diagnose();
+  for (var i = 0; i < selects.length; i++) {
+    if (selects[i].value === symptom) {
+      selects[i].value = "";
+    }
+  }
+}
+
+function updateSelectedSymptomsDisplay() {
+  selectedCounter.innerHTML = selectedSymptoms.length;
+  if (selectedSymptoms.length === 0) {
+    selectedContainer.innerHTML = '<div class="empty-message">暫無選擇症狀，請從左側選擇</div>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < selectedSymptoms.length; i++) {
+    html += '<div class="symptom-tag">' + selectedSymptoms[i] +
+            '<button class="remove-btn" onclick="removeSymptom(\'' + selectedSymptoms[i] + '\')">&times;</button>' +
+            '</div>';
+  }
+  selectedContainer.innerHTML = html;
+}
+
+function clearAll() {
+  selectedSymptoms = [];
+  for (var i = 0; i < selects.length; i++) {
+    selects[i].value = "";
+  }
+  updateSelectedSymptomsDisplay();
+  output.innerHTML = '<div class="no-results"><i class="fas fa-info-circle"></i><p>請選擇症狀開始辨證分析</p><p>每選一項症狀，系統會自動更新辨證結果</p></div>';
+  resultCounter.innerHTML = "0";
+}
+
+function diagnose() {
+  if (selectedSymptoms.length === 0) {
+    output.innerHTML = '<div class="no-results"><i class="fas fa-info-circle"></i><p>請選擇症狀開始辨證分析</p><p>每選一項症狀，系統會自動更新辨證結果</p></div>';
+    resultCounter.innerHTML = "0";
+    return;
+  }
+  var results = [];
+  for (var i = 1; i < patterns.length; i++) {
+    if (patterns[i]) {
+      var patternData = parsePattern(patterns[i]);
+      if (!patternData) continue;
+      var name = patternData.name;
+      var symptoms = patternData.symptoms;
+
+      var match = 0;
+      for (var j = 0; j < symptoms.length; j++) {
+        for (var k = 0; k < selectedSymptoms.length; k++) {
+          if (symptoms[j] === selectedSymptoms[k]) {
+            match++;
+            break;
+          }
+        }
+      }
+
+      var rate = Math.round(match / symptoms.length * 100);
+      if (rate >= 20) {
+        var meds = parseMedicine(medicine[i]);
+        results[results.length] = {
+          type: name,
+          match: match,
+          total: symptoms.length,
+          rate: rate,
+          symptoms: symptoms,
+          medicine: meds
+        };
+      }
+    }
+  }
+
+  results.sort(function(a, b) {
+    return b.rate - a.rate;
+  });
+
+  resultCounter.innerHTML = results.length;
+  if (results.length === 0) {
+    output.innerHTML = '<div class="no-results"><i class="fas fa-exclamation-triangle"></i><p>無法辨證，請補充更多症狀</p><p>當前症狀組合無匹配病證</p></div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < results.length; i++) {
+    var r = results[i];
+    html += '<div class="diagnosis-item">';
+    html += '<div class="diagnosis-title"><i class="fas fa-disease"></i> ' + r.type +
+            ' <span class="match-rate">' + r.rate + '% 匹配度</span></div>';
+    html += '<div>匹配症狀：' + r.match + '/' + r.total + '</div>';
+    html += '<div class="symptoms-list"><ul>';
+    for (var j = 0; j < r.symptoms.length; j++) {
+      var matched = false;
+      for (var k = 0; k < selectedSymptoms.length; k++) {
+        if (r.symptoms[j] === selectedSymptoms[k]) {
+          matched = true;
+          break;
+        }
+      }
+      var cls = matched ? 'matched-symptom' : 'unmatched-symptom';
+      html += '<li class="' + cls + '">' + r.symptoms[j] + '</li>';
+    }
+    html += '</ul></div>';
+    html += '<div class="medicine-recommendation"><h4><i class="fas fa-pills"></i> 推薦中成藥</h4><ul class="medicine-list">';
+    for (var j = 0; j < r.medicine.length; j++) {
+      html += '<li><div class="medicine-name">' + r.medicine[j].name + '</div>' +
+              '<div class="medicine-function">' + r.medicine[j].function + '</div></li>';
+    }
+    html += '</ul></div></div>';
+  }
+
+  output.innerHTML = html;
+}
+
+function parsePattern(patternStr) {
+  var match = patternStr.match(/病症:(.*?) 症狀:(.*)/);
+  if (!match) return null;
+  var name = match[1];
+  var symptoms = match[2].split(',');
+  return { name: name, symptoms: symptoms };
+}
+
+function parseMedicine(medicineStr) {
+  var arr = [];
+  var meds = medicineStr.split(' ');
+  for (var i = 0; i < meds.length; i++) {
+    var parts = meds[i].split(':');
+    if (parts.length === 2) {
+      arr[arr.length] = {
+        name: parts[0],
+        function: parts[1]
+      };
+    }
+  }
+  return arr;
+}
+</script>
+</body>
+</html>
