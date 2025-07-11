@@ -5,6 +5,7 @@
 // 病型模式定義 - 使用數組形式存儲
 var patterns = new Array();
 var medicine = new Array();
+var patterns = []; var medicine = [];
 
 // 太陽傷寒表實證
 patterns[1] = '病症:太陽傷寒表實證 症狀:惡寒,頭身重疼,脈浮緊,咳嗽,清涕,苔白,咳嗽,頭痛,白痰,鼻塞重,不渴,舌胖,無汗,高熱,發熱';
