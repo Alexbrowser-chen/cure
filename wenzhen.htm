@@ -273,20 +273,25 @@
   </div>
 
 
-  <script>
-    alert(patterns[10]);
-var selectedSymptoms = [];
-var selects = document.getElementsByTagName('select');
-var selectedContainer = document.getElementById('selected-symptoms-container');
-var selectedCounter = document.getElementById('selectedCounter');
-var resultCounter = document.getElementById('resultCounter');
-var symptomCounter = document.getElementById('symptomCounter');
-var output = document.getElementById('output');
-var clearBtn = document.getElementById('clearBtn');
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // ✅ 測試是否讀入成功
+  if (typeof patterns === 'undefined') {
+    alert("外部 JS 檔案尚未正確載入！");
+    return;
+  }
 
-document.addEventListener('DOMContentLoaded', function() {
+  var selectedSymptoms = [];
+  var selects = document.getElementsByTagName('select');
+  var selectedContainer = document.getElementById('selected-symptoms-container');
+  var selectedCounter = document.getElementById('selectedCounter');
+  var resultCounter = document.getElementById('resultCounter');
+  var symptomCounter = document.getElementById('symptomCounter');
+  var output = document.getElementById('output');
+  var clearBtn = document.getElementById('clearBtn');
+
   for (var i = 0; i < selects.length; i++) {
-    selects[i].onchange = function() {
+    selects[i].onchange = function () {
       if (this.value) {
         addSymptom(this.value);
       } else {
@@ -295,207 +300,141 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  clearBtn.onclick = function() {
+  clearBtn.onclick = function () {
     clearAll();
   };
 
   updateSymptomCount();
-});
 
-function updateSymptomCount() {
-  var total = 0;
-  for (var i = 0; i < selects.length; i++) {
-    total += selects[i].options.length - 1;
+  function updateSymptomCount() {
+    var total = 0;
+    for (var i = 0; i < selects.length; i++) {
+      total += selects[i].options.length - 1;
+    }
+    symptomCounter.innerHTML = total;
   }
-  symptomCounter.innerHTML = total;
-}
 
-function addSymptom(symptom) {
-  var exists = false;
-  for (var i = 0; i < selectedSymptoms.length; i++) {
-    if (selectedSymptoms[i] === symptom) {
-      exists = true;
-      break;
+  function addSymptom(symptom) {
+    if (!selectedSymptoms.includes(symptom)) {
+      selectedSymptoms.push(symptom);
+      updateSelectedSymptomsDisplay();
+      diagnose();
     }
   }
-  if (!exists) {
-    selectedSymptoms[selectedSymptoms.length] = symptom;
+
+  function removeCategorySymptoms(categoryId) {
+    var sel = document.getElementById(categoryId);
+    var options = Array.from(sel.options).map(o => o.value).filter(Boolean);
+    selectedSymptoms = selectedSymptoms.filter(s => !options.includes(s));
     updateSelectedSymptomsDisplay();
     diagnose();
   }
-}
 
-function removeCategorySymptoms(categoryId) {
-  var sel = document.getElementById(categoryId);
-  var options = [];
-  for (var i = 0; i < sel.options.length; i++) {
-    if (sel.options[i].value) {
-      options[options.length] = sel.options[i].text;
-    }
-  }
-
-  var newSymptoms = [];
-  for (var i = 0; i < selectedSymptoms.length; i++) {
-    var isFound = false;
-    for (var j = 0; j < options.length; j++) {
-      if (selectedSymptoms[i] === options[j]) {
-        isFound = true;
-        break;
+  function removeSymptom(symptom) {
+    selectedSymptoms = selectedSymptoms.filter(s => s !== symptom);
+    updateSelectedSymptomsDisplay();
+    diagnose();
+    for (var i = 0; i < selects.length; i++) {
+      if (selects[i].value === symptom) {
+        selects[i].value = "";
       }
     }
-    if (!isFound) {
-      newSymptoms[newSymptoms.length] = selectedSymptoms[i];
-    }
   }
-  selectedSymptoms = newSymptoms;
-  updateSelectedSymptomsDisplay();
-  diagnose();
-}
 
-function removeSymptom(symptom) {
-  var newSymptoms = [];
-  for (var i = 0; i < selectedSymptoms.length; i++) {
-    if (selectedSymptoms[i] !== symptom) {
-      newSymptoms[newSymptoms.length] = selectedSymptoms[i];
+  function updateSelectedSymptomsDisplay() {
+    selectedCounter.innerHTML = selectedSymptoms.length;
+    if (selectedSymptoms.length === 0) {
+      selectedContainer.innerHTML = '<div class="empty-message">暫無選擇症狀，請從左側選擇</div>';
+      return;
     }
+    selectedContainer.innerHTML = selectedSymptoms.map(symptom =>
+      `<div class="symptom-tag">${symptom}<button class="remove-btn" onclick="removeSymptom('${symptom}')">&times;</button></div>`
+    ).join('');
   }
-  selectedSymptoms = newSymptoms;
-  updateSelectedSymptomsDisplay();
-  diagnose();
-  for (var i = 0; i < selects.length; i++) {
-    if (selects[i].value === symptom) {
+
+  function clearAll() {
+    selectedSymptoms = [];
+    for (var i = 0; i < selects.length; i++) {
       selects[i].value = "";
     }
-  }
-}
-
-function updateSelectedSymptomsDisplay() {
-  selectedCounter.innerHTML = selectedSymptoms.length;
-  if (selectedSymptoms.length === 0) {
-    selectedContainer.innerHTML = '<div class="empty-message">暫無選擇症狀，請從左側選擇</div>';
-    return;
-  }
-  var html = '';
-  for (var i = 0; i < selectedSymptoms.length; i++) {
-    html += '<div class="symptom-tag">' + selectedSymptoms[i] +
-            '<button class="remove-btn" onclick="removeSymptom(\'' + selectedSymptoms[i] + '\')">&times;</button>' +
-            '</div>';
-  }
-  selectedContainer.innerHTML = html;
-}
-
-function clearAll() {
-  selectedSymptoms = [];
-  for (var i = 0; i < selects.length; i++) {
-    selects[i].value = "";
-  }
-  updateSelectedSymptomsDisplay();
-  output.innerHTML = '<div class="no-results"><i class="fas fa-info-circle"></i><p>請選擇症狀開始辨證分析</p><p>每選一項症狀，系統會自動更新辨證結果</p></div>';
-  resultCounter.innerHTML = "0";
-}
-
-function diagnose() {
-  if (selectedSymptoms.length === 0) {
+    updateSelectedSymptomsDisplay();
     output.innerHTML = '<div class="no-results"><i class="fas fa-info-circle"></i><p>請選擇症狀開始辨證分析</p><p>每選一項症狀，系統會自動更新辨證結果</p></div>';
     resultCounter.innerHTML = "0";
-    return;
   }
-  var results = [];
-  for (var i = 1; i < patterns.length; i++) {
-    if (patterns[i]) {
+
+  function diagnose() {
+    if (selectedSymptoms.length === 0) {
+      output.innerHTML = '<div class="no-results"><i class="fas fa-info-circle"></i><p>請選擇症狀開始辨證分析</p><p>每選一項症狀，系統會自動更新辨證結果</p></div>';
+      resultCounter.innerHTML = "0";
+      return;
+    }
+
+    var results = [];
+    for (var i = 1; i < patterns.length; i++) {
+      if (!patterns[i]) continue;
+
       var patternData = parsePattern(patterns[i]);
       if (!patternData) continue;
-      var name = patternData.name;
-      var symptoms = patternData.symptoms;
 
-      var match = 0;
-      for (var j = 0; j < symptoms.length; j++) {
-        for (var k = 0; k < selectedSymptoms.length; k++) {
-          if (symptoms[j] === selectedSymptoms[k]) {
-            match++;
-            break;
-          }
-        }
-      }
+      var matchedSymptoms = patternData.symptoms.filter(s => selectedSymptoms.includes(s));
+      var rate = Math.round(matchedSymptoms.length / patternData.symptoms.length * 100);
 
-      var rate = Math.round(match / symptoms.length * 100);
       if (rate >= 20) {
         var meds = parseMedicine(medicine[i]);
-        results[results.length] = {
-          type: name,
-          match: match,
-          total: symptoms.length,
+        results.push({
+          type: patternData.name,
+          match: matchedSymptoms.length,
+          total: patternData.symptoms.length,
           rate: rate,
-          symptoms: symptoms,
+          symptoms: patternData.symptoms,
           medicine: meds
-        };
+        });
       }
     }
-  }
 
-  results.sort(function(a, b) {
-    return b.rate - a.rate;
-  });
+    results.sort((a, b) => b.rate - a.rate);
+    resultCounter.innerHTML = results.length;
 
-  resultCounter.innerHTML = results.length;
-  if (results.length === 0) {
-    output.innerHTML = '<div class="no-results"><i class="fas fa-exclamation-triangle"></i><p>無法辨證，請補充更多症狀</p><p>當前症狀組合無匹配病證</p></div>';
-    return;
-  }
-
-  var html = '';
-  for (var i = 0; i < results.length; i++) {
-    var r = results[i];
-    html += '<div class="diagnosis-item">';
-    html += '<div class="diagnosis-title"><i class="fas fa-disease"></i> ' + r.type +
-            ' <span class="match-rate">' + r.rate + '% 匹配度</span></div>';
-    html += '<div>匹配症狀：' + r.match + '/' + r.total + '</div>';
-    html += '<div class="symptoms-list"><ul>';
-    for (var j = 0; j < r.symptoms.length; j++) {
-      var matched = false;
-      for (var k = 0; k < selectedSymptoms.length; k++) {
-        if (r.symptoms[j] === selectedSymptoms[k]) {
-          matched = true;
-          break;
-        }
-      }
-      var cls = matched ? 'matched-symptom' : 'unmatched-symptom';
-      html += '<li class="' + cls + '">' + r.symptoms[j] + '</li>';
+    if (results.length === 0) {
+      output.innerHTML = '<div class="no-results"><i class="fas fa-exclamation-triangle"></i><p>無法辨證，請補充更多症狀</p><p>當前症狀組合無匹配病證</p></div>';
+      return;
     }
-    html += '</ul></div>';
-    html += '<div class="medicine-recommendation"><h4><i class="fas fa-pills"></i> 推薦中成藥</h4><ul class="medicine-list">';
-    for (var j = 0; j < r.medicine.length; j++) {
-      html += '<li><div class="medicine-name">' + r.medicine[j].name + '</div>' +
-              '<div class="medicine-function">' + r.medicine[j].function + '</div></li>';
-    }
-    html += '</ul></div></div>';
+
+    output.innerHTML = results.map(r => `
+      <div class="diagnosis-item">
+        <div class="diagnosis-title"><i class="fas fa-disease"></i> ${r.type} <span class="match-rate">${r.rate}% 匹配度</span></div>
+        <div>匹配症狀：${r.match}/${r.total}</div>
+        <div class="symptoms-list">
+          <ul>
+            ${r.symptoms.map(s => `<li class="${selectedSymptoms.includes(s) ? 'matched-symptom' : 'unmatched-symptom'}">${s}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="medicine-recommendation">
+          <h4><i class="fas fa-pills"></i> 推薦中成藥</h4>
+          <ul class="medicine-list">
+            ${r.medicine.map(m => `<li><div class="medicine-name">${m.name}</div><div class="medicine-function">${m.function}</div></li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `).join('');
   }
 
-  output.innerHTML = html;
-}
-
-function parsePattern(patternStr) {
-  var match = patternStr.match(/病症:(.*?) 症狀:(.*)/);
-  if (!match) return null;
-  var name = match[1];
-  var symptoms = match[2].split(',');
-  return { name: name, symptoms: symptoms };
-}
-
-function parseMedicine(medicineStr) {
-  var arr = [];
-  var meds = medicineStr.split(' ');
-  for (var i = 0; i < meds.length; i++) {
-    var parts = meds[i].split(':');
-    if (parts.length === 2) {
-      arr[arr.length] = {
-        name: parts[0],
-        function: parts[1]
-      };
-    }
+  function parsePattern(str) {
+    var match = str.match(/病症:(.*?) 症狀:(.*)/);
+    if (!match) return null;
+    return { name: match[1], symptoms: match[2].split(',') };
   }
-  return arr;
-}
+
+  function parseMedicine(str) {
+    return str.split(' ').map(m => {
+      var [name, func] = m.split(':');
+      return { name: name, function: func || "" };
+    }).filter(m => m.name);
+  }
+
+  // ✅ 預先跑一次（可省略）
+  diagnose();
+});
 </script>
 </body>
 </html>
