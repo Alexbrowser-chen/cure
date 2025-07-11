@@ -6,8 +6,6 @@
 <title>中醫辨證系統</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="wenzhen-style.css">
-    <!-- 外部数据文件 -->
-<script src="wenzhen-symp-medi-data.js" defer></script>
 </head>
 <body>
   <div class="container">
@@ -272,170 +270,300 @@
     </footer>
   </div>
 
+  <!-- 外部数据文件 -->
+<meta charset="UTF-8">
+<script src="wenzhen-symp-medi-data.js"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  // ✅ 測試是否讀入成功
-    alert(patterns[3]);
-  if (typeof patterns === 'undefined') {
-    alert("外部 JS 檔案尚未正確載入！");
-    return;
-  }
-
-  var selectedSymptoms = [];
-  var selects = document.getElementsByTagName('select');
-  var selectedContainer = document.getElementById('selected-symptoms-container');
-  var selectedCounter = document.getElementById('selectedCounter');
-  var resultCounter = document.getElementById('resultCounter');
-  var symptomCounter = document.getElementById('symptomCounter');
-  var output = document.getElementById('output');
-  var clearBtn = document.getElementById('clearBtn');
-
-  for (var i = 0; i < selects.length; i++) {
-    selects[i].onchange = function () {
-      if (this.value) {
-        addSymptom(this.value);
-      } else {
-        removeCategorySymptoms(this.id);
-      }
-    };
-  }
-
-  clearBtn.onclick = function () {
-    clearAll();
-  };
-
-  updateSymptomCount();
-
-  function updateSymptomCount() {
-    var total = 0;
-    for (var i = 0; i < selects.length; i++) {
-      total += selects[i].options.length - 1;
+  <script>
+    // 存儲已選症狀
+    let selectedSymptoms = [];
+    
+    // 獲取所有下拉式功能表
+    const selects = document.querySelectorAll('select');
+    
+    // 獲取DOM元素
+    const selectedContainer = document.getElementById('selected-symptoms-container');
+    const selectedCounter = document.getElementById('selectedCounter');
+    const resultCounter = document.getElementById('resultCounter');
+    const symptomCounter = document.getElementById('symptomCounter');
+    const output = document.getElementById('output');
+    const clearBtn = document.getElementById('clearBtn');
+    
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 添加下拉式功能表事件監聽
+      selects.forEach(select => {
+        select.addEventListener('change', function() {
+          if (this.value) {
+            addSymptom(this.value);
+          } else {
+            removeCategorySymptoms(this.id);
+          }
+        });
+      });
+      
+      // 清除按鈕事件
+      clearBtn.addEventListener('click', clearAll);
+      
+      // 更新症狀總數
+      updateSymptomCount();
+    });
+    
+    // 更新症狀總數
+    function updateSymptomCount() {
+      let totalSymptoms = 0;
+      selects.forEach(select => {
+        // 減去預設選項
+        totalSymptoms += select.options.length - 1;
+      });
+      symptomCounter.textContent = totalSymptoms;
     }
-    symptomCounter.innerHTML = total;
-  }
-
-  function addSymptom(symptom) {
-    if (!selectedSymptoms.includes(symptom)) {
-      selectedSymptoms.push(symptom);
+    
+    // 添加症狀
+    function addSymptom(symptom) {
+      // 避免重複添加
+      if (!selectedSymptoms.includes(symptom)) {
+        selectedSymptoms.push(symptom);
+        
+        // 更新顯示
+        updateSelectedSymptomsDisplay();
+        
+        // 自動診斷
+        diagnose();
+      }
+    }
+    
+    // 移除特定分類的症狀
+    function removeCategorySymptoms(categoryId) {
+      // 獲取該分類的所有選項文本
+      const options = Array.from(document.querySelector(`#${categoryId}`).options)
+        .map(option => option.text)
+        .filter(text => text && text !== "-- 選擇" + getCategoryName(categoryId) + " --");
+      
+      // 從已選症狀中移除該分類的症狀
+      selectedSymptoms = selectedSymptoms.filter(symptom => !options.includes(symptom));
+      
+      // 更新顯示
       updateSelectedSymptomsDisplay();
+      
+      // 自動診斷
       diagnose();
     }
-  }
-
-  function removeCategorySymptoms(categoryId) {
-    var sel = document.getElementById(categoryId);
-    var options = Array.from(sel.options).map(o => o.value).filter(Boolean);
-    selectedSymptoms = selectedSymptoms.filter(s => !options.includes(s));
-    updateSelectedSymptomsDisplay();
-    diagnose();
-  }
-
-  function removeSymptom(symptom) {
-    selectedSymptoms = selectedSymptoms.filter(s => s !== symptom);
-    updateSelectedSymptomsDisplay();
-    diagnose();
-    for (var i = 0; i < selects.length; i++) {
-      if (selects[i].value === symptom) {
-        selects[i].value = "";
-      }
+    
+    // 獲取分類名稱
+    function getCategoryName(categoryId) {
+      const categoryTitles = {
+        'hot': '寒熱症狀',
+        'sweat': '出汗症狀',
+        'nose': '鼻部症狀',
+        'mouth': '口部症狀',
+        'throat': '咽喉症狀',
+        'lips': '唇部症狀',
+        'breath': '呼吸症狀',
+        'chest': '胸腹背項脇症狀',
+        'phlegm': '痰液症狀',
+        'pain': '疼痛症狀',
+        'urine': '小便症狀',
+        'stool': '大便症狀',
+        'tongue': '舌部症狀',
+        'spirit': '精神狀態',
+        'pulse': '脈象'
+      };
+      
+      return categoryTitles[categoryId] || '症狀';
     }
-  }
-
-  function updateSelectedSymptomsDisplay() {
-    selectedCounter.innerHTML = selectedSymptoms.length;
-    if (selectedSymptoms.length === 0) {
-      selectedContainer.innerHTML = '<div class="empty-message">暫無選擇症狀，請從左側選擇</div>';
-      return;
-    }
-    selectedContainer.innerHTML = selectedSymptoms.map(symptom =>
-      `<div class="symptom-tag">${symptom}<button class="remove-btn" onclick="removeSymptom('${symptom}')">&times;</button></div>`
-    ).join('');
-  }
-
-  function clearAll() {
-    selectedSymptoms = [];
-    for (var i = 0; i < selects.length; i++) {
-      selects[i].value = "";
-    }
-    updateSelectedSymptomsDisplay();
-    output.innerHTML = '<div class="no-results"><i class="fas fa-info-circle"></i><p>請選擇症狀開始辨證分析</p><p>每選一項症狀，系統會自動更新辨證結果</p></div>';
-    resultCounter.innerHTML = "0";
-  }
-
-  function diagnose() {
-    if (selectedSymptoms.length === 0) {
-      output.innerHTML = '<div class="no-results"><i class="fas fa-info-circle"></i><p>請選擇症狀開始辨證分析</p><p>每選一項症狀，系統會自動更新辨證結果</p></div>';
-      resultCounter.innerHTML = "0";
-      return;
-    }
-
-    var results = [];
-    for (var i = 1; i < patterns.length; i++) {
-      if (!patterns[i]) continue;
-
-      var patternData = parsePattern(patterns[i]);
-      if (!patternData) continue;
-
-      var matchedSymptoms = patternData.symptoms.filter(s => selectedSymptoms.includes(s));
-      var rate = Math.round(matchedSymptoms.length / patternData.symptoms.length * 100);
-
-      if (rate >= 20) {
-        var meds = parseMedicine(medicine[i]);
-        results.push({
-          type: patternData.name,
-          match: matchedSymptoms.length,
-          total: patternData.symptoms.length,
-          rate: rate,
-          symptoms: patternData.symptoms,
-          medicine: meds
+    
+    // 移除症狀
+    function removeSymptom(symptom) {
+      const index = selectedSymptoms.indexOf(symptom);
+      if (index !== -1) {
+        selectedSymptoms.splice(index, 1);
+        updateSelectedSymptomsDisplay();
+        diagnose();
+        
+        // 清除對應下拉式功能表的選擇
+        selects.forEach(select => {
+          if (select.value === symptom) {
+            select.value = "";
+          }
         });
       }
     }
-
-    results.sort((a, b) => b.rate - a.rate);
-    resultCounter.innerHTML = results.length;
-
-    if (results.length === 0) {
-      output.innerHTML = '<div class="no-results"><i class="fas fa-exclamation-triangle"></i><p>無法辨證，請補充更多症狀</p><p>當前症狀組合無匹配病證</p></div>';
-      return;
+    
+    // 更新已選症狀顯示
+    function updateSelectedSymptomsDisplay() {
+      selectedCounter.textContent = selectedSymptoms.length;
+      
+      if (selectedSymptoms.length === 0) {
+        selectedContainer.innerHTML = '<div class="empty-message">暫無選擇症狀，請從左側選擇</div>';
+        return;
+      }
+      
+      let html = '';
+      selectedSymptoms.forEach(symptom => {
+        html += `
+          <div class="symptom-tag">
+            ${symptom}
+            <button class="remove-btn" onclick="removeSymptom('${symptom}')">&times;</button>
+          </div>
+        `;
+      });
+      selectedContainer.innerHTML = html;
     }
-
-    output.innerHTML = results.map(r => `
-      <div class="diagnosis-item">
-        <div class="diagnosis-title"><i class="fas fa-disease"></i> ${r.type} <span class="match-rate">${r.rate}% 匹配度</span></div>
-        <div>匹配症狀：${r.match}/${r.total}</div>
-        <div class="symptoms-list">
-          <ul>
-            ${r.symptoms.map(s => `<li class="${selectedSymptoms.includes(s) ? 'matched-symptom' : 'unmatched-symptom'}">${s}</li>`).join('')}
-          </ul>
+    
+    // 清除所有選擇
+    function clearAll() {
+      selectedSymptoms = [];
+      selects.forEach(select => {
+        select.value = "";
+      });
+      updateSelectedSymptomsDisplay();
+      output.innerHTML = `
+        <div class="no-results">
+          <i class="fas fa-info-circle"></i>
+          <p>請選擇症狀開始辨證分析</p>
+          <p>每選一項症狀，系統會自動更新辨證結果</p>
         </div>
-        <div class="medicine-recommendation">
-          <h4><i class="fas fa-pills"></i> 推薦中成藥</h4>
-          <ul class="medicine-list">
-            ${r.medicine.map(m => `<li><div class="medicine-name">${m.name}</div><div class="medicine-function">${m.function}</div></li>`).join('')}
-          </ul>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function parsePattern(str) {
-    var match = str.match(/病症:(.*?) 症狀:(.*)/);
-    if (!match) return null;
-    return { name: match[1], symptoms: match[2].split(',') };
-  }
-
-  function parseMedicine(str) {
-    return str.split(' ').map(m => {
-      var [name, func] = m.split(':');
-      return { name: name, function: func || "" };
-    }).filter(m => m.name);
-  }
-
-  // ✅ 預先跑一次（可省略）
-  diagnose();
-});
-</script>
+      `;
+      resultCounter.textContent = "0";
+    }
+    
+    // 診斷函數（即時執行）
+    function diagnose() {
+      if (selectedSymptoms.length === 0) {
+        output.innerHTML = `
+          <div class="no-results">
+            <i class="fas fa-info-circle"></i>
+            <p>請選擇症狀開始辨證分析</p>
+            <p>每選一項症狀，系統會自動更新辨證結果</p>
+          </div>
+        `;
+        resultCounter.textContent = "0";
+        return;
+      }
+      
+      const results = [];
+      
+      // 計算每個病型的匹配度
+      for (let i = 1; i < patterns.length; i++) {
+        if (patterns[i]) {
+          const patternData = parsePattern(patterns[i]);
+          if (!patternData) continue;
+          
+          const { name, symptoms } = patternData;
+          
+          // 檢查當前病證是否包含所有已選症狀
+          const containsAll = selectedSymptoms.every(symptom => symptoms.includes(symptom));
+          
+          if (containsAll) {
+            let match = 0;
+            symptoms.forEach(symptom => {
+              if (selectedSymptoms.includes(symptom)) match++;
+            });
+            
+            const rate = Math.round((match / symptoms.length) * 100);
+            
+            // 獲取對應的藥物數據
+            const meds = parseMedicine(medicine[i]);
+            
+            results.push({ 
+              type: name,
+              match, 
+              total: symptoms.length, 
+              rate,
+              symptoms,
+              medicine: meds
+            });
+          }
+        }
+      }
+      
+      // 按匹配度排序
+      results.sort((a, b) => b.rate - a.rate);
+      
+      // 更新結果計數器
+      resultCounter.textContent = results.length;
+      
+      // 顯示結果
+      if (results.length === 0) {
+        output.innerHTML = `
+          <div class="no-results">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>無法辨證，請補充更多症狀</p>
+            <p>當前症狀組合無匹配病證</p>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '';
+      results.forEach(r => {
+        html += `
+          <div class="diagnosis-item">
+            <div class="diagnosis-title">
+              <i class="fas fa-disease"></i> ${r.type} 
+              <span class="match-rate">${r.rate}% 匹配度</span>
+            </div>
+            <div>匹配症狀：${r.match}/${r.total}</div>
+            <div class="symptoms-list">
+              <ul>
+                ${r.symptoms.map(s => {
+                  const matched = selectedSymptoms.includes(s);
+                  const cls = matched ? 'matched-symptom' : 'unmatched-symptom';
+                  return `<li class="${cls}">${s}</li>`;
+                }).join('')}
+              </ul>
+            </div>
+            <div class="medicine-recommendation">
+              <h4><i class="fas fa-pills"></i> 推薦中成藥</h4>
+              <ul class="medicine-list">
+                ${r.medicine.map(m => `
+                  <li>
+                    <div class="medicine-name">${m.name}</div>
+                    <div class="medicine-function">${m.function}</div>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      });
+      
+      output.innerHTML = html;
+    }
+    
+    // 解析病證數據
+    function parsePattern(patternStr) {
+      // 格式: "病症:太陽傷寒表實證 症狀:惡寒,頭身重疼,..."
+      const patternMatch = patternStr.match(/病症:(.*?) 症狀:(.*)/);
+      if (!patternMatch) return null;
+      
+      const name = patternMatch[1];
+      const symptoms = patternMatch[2].split(',');
+      
+      return { name, symptoms };
+    }
+    
+    // 解析藥物數據
+    function parseMedicine(medicineStr) {
+      // 格式: "麻黃湯:發汗解表、宣肺平喘 荊防感冒顆粒:祛風散寒止痛(頭痛，項背痛，咽痛)"
+      const medicineArray = [];
+      
+      // 用空格分隔不同藥物
+      const meds = medicineStr.split(' ');
+      
+      meds.forEach(med => {
+        const parts = med.split(':');
+        if (parts.length === 2) {
+          medicineArray.push({
+            name: parts[0],
+            function: parts[1]
+          });
+        }
+      });
+      
+      return medicineArray;
+    }
+  </script>
 </body>
 </html>
